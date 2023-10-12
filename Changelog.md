@@ -10,6 +10,7 @@ Compiler Features:
  * EVM: Support for the EVM version "Prague".
  * SMTChecker: Add CHC engine check for underflow and overflow in unary minus operation.
  * SMTChecker: Replace CVC4 as a possible BMC backend with cvc5.
+ * Commandline Interface: Allow the use of ``--asm-json`` output option in assembler mode to export EVM assembly of the contracts in JSON format.
 
 
 Bugfixes:
