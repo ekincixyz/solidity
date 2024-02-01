@@ -1649,6 +1649,40 @@ BOOST_AUTO_TEST_CASE(cse_replace_too_large_shift)
 	});
 }
 
+BOOST_AUTO_TEST_CASE(cse_dup)
+{
+	AssemblyItems input{
+		u256(0),
+		Instruction::DUP1,
+		Instruction::REVERT
+	};
+	AssemblyItems output = input;
+
+	checkCSE(input, output);
+	checkFullCSE(input, output);
+}
+
+BOOST_AUTO_TEST_CASE(cse_push0)
+{
+	AssemblyItems input{
+		u256(0),
+		u256(0),
+		Instruction::REVERT
+	};
+	AssemblyItems output{
+		u256(0),
+		Instruction::DUP1,
+		Instruction::REVERT
+	};
+	// The CSE has a rule to replace with DUP1 PUSH0
+	checkCSE(input, output);
+
+	// The full handling by the compiler (Assembly::optimiseInternal)
+	// will not choose to replace the pattern, because the new size is the same as the old one
+	output = input;
+	checkFullCSE(input, output);
+}
+
 BOOST_AUTO_TEST_CASE(inliner)
 {
 	AssemblyItem jumpInto{Instruction::JUMP};
