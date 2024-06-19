@@ -13,6 +13,7 @@ Compiler Features:
 
 
 Bugfixes:
+ * AsmParser: Parsing rules for source location comments have been relaxed: Whitespace between the indices as well as single-quoted code snippets are now allowed. Alleviates risk of encountering a segfault for very long comments.
  * SMTChecker: Fix error that reports invalid number of verified checks for BMC and CHC engines.
  * SMTChecker: Fix formatting of unary minus expressions in invariants.
  * SMTChecker: Fix internal compiler error when reporting proved targets for BMC engine.
