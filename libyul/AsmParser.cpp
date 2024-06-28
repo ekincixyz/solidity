@@ -191,11 +191,11 @@ std::optional<std::pair<std::string_view, SourceLocation>> Parser::parseSrcComme
 	langutil::SourceLocation const& _commentLocation
 )
 {
-	CharStream argumentStream (std::string(_arguments), "");
-	Scanner scanner (argumentStream);
+	CharStream argumentStream(std::string(_arguments), "");
+	Scanner scanner(argumentStream);
 	scanner.setScannerMode(ScannerKind::SpecialComment);
 
-	std::string_view tail { _arguments.substr(_arguments.size()) };
+	std::string_view tail{_arguments.substr(_arguments.size())};
 	auto const parseLocationComponent = [](Scanner& _scanner, bool expectTrailingColon) -> std::optional<std::string>
 	{
 		bool negative = false;
