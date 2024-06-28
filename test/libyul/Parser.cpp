@@ -33,6 +33,8 @@
 #include <liblangutil/ErrorReporter.h>
 
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/test/data/monomorphic.hpp>
+#include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include <memory>
@@ -831,6 +833,21 @@ BOOST_AUTO_TEST_CASE(customSourceLocations_single_quote_snippet_with_whitespaces
 	BOOST_REQUIRE(!!result && errorList.size() == 0);
 	// the second source location is not parsed as such, as the hex string isn't interpreted as snippet but
 	// as the beginning of the tail in AsmParser
+	CHECK_LOCATION(result->debugData->originLocation, "source1", 222, 333);
+}
+
+BOOST_DATA_TEST_CASE(customSourceLocations_scanner_errors_outside_string_lits_are_ignored, boost::unit_test::data::make({"0x ", "/** unterminated comment", "1_23_4"}), invalid)
+{
+	ErrorList errorList;
+	ErrorReporter reporter(errorList);
+	auto const sourceText = fmt::format(R"(
+		/// @src 0:111:222 {}
+		/// @src 1:222:333
+		{{}}
+	)", invalid);
+	EVMDialectTyped const& dialect = EVMDialectTyped::instance(EVMVersion{});
+	std::shared_ptr<Block> result = parse(sourceText, dialect, reporter);
+	BOOST_REQUIRE(!!result && errorList.empty());
 	CHECK_LOCATION(result->debugData->originLocation, "source1", 222, 333);
 }
 

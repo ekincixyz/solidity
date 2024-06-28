@@ -240,6 +240,8 @@ std::optional<std::pair<std::string_view, SourceLocation>> Parser::parseSrcComme
 	else
 		tail = _arguments.substr(static_cast<size_t>(scanner.currentLocation().start));
 
+	// Other scanner errors may occur if there is no string literal which follows
+	// (f.ex. IllegalHexDigit, IllegalCommentTerminator), but these are ignored
 	if (scanner.currentToken() == Token::Illegal && scanner.currentError() == ScannerError::IllegalStringEndQuote)
 	{
 		m_errorReporter.syntaxError(
