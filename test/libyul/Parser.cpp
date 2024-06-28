@@ -801,6 +801,39 @@ BOOST_AUTO_TEST_CASE(customSourceLocations_two_snippets_with_hex_comment)
 	CHECK_LOCATION(result->debugData->originLocation, "source0", 111, 222);
 }
 
+BOOST_AUTO_TEST_CASE(customSourceLocations_invalid_escapes)
+{
+	ErrorList errorList;
+	ErrorReporter reporter(errorList);
+	auto const sourceText = R"(
+		/// @src 0:111:222 "\n\\x\x\w\uö\xy\z\y\fq"
+		{}
+	)";
+	EVMDialectTyped const& dialect = EVMDialectTyped::instance(EVMVersion{});
+	std::shared_ptr<Block> result = parse(sourceText, dialect, reporter);
+	BOOST_REQUIRE(!!result && errorList.size() == 0);
+	// the second source location is not parsed as such, as the hex string isn't interpreted as snippet but
+	// as the beginning of the tail in AsmParser
+	CHECK_LOCATION(result->debugData->originLocation, "source0", 111, 222);
+}
+
+BOOST_AUTO_TEST_CASE(customSourceLocations_single_quote_snippet_with_whitespaces_and_escapes)
+{
+	ErrorList errorList;
+	ErrorReporter reporter(errorList);
+	auto const sourceText = R"(
+		/// @src 0:111:222 '\n\\x\x\w\uö\xy\z\y\fq'
+		/// @src 1 :		222 : 333 '\x33\u1234\t\n'
+		{}
+	)";
+	EVMDialectTyped const& dialect = EVMDialectTyped::instance(EVMVersion{});
+	std::shared_ptr<Block> result = parse(sourceText, dialect, reporter);
+	BOOST_REQUIRE(!!result && errorList.size() == 0);
+	// the second source location is not parsed as such, as the hex string isn't interpreted as snippet but
+	// as the beginning of the tail in AsmParser
+	CHECK_LOCATION(result->debugData->originLocation, "source1", 222, 333);
+}
+
 BOOST_AUTO_TEST_CASE(customSourceLocations_multi_line_source_loc)
 {
 	ErrorList errorList;

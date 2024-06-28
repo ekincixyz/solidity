@@ -1026,6 +1026,35 @@ BOOST_AUTO_TEST_CASE(yul_function_with_whitespace)
 	BOOST_CHECK_EQUAL(scanner.next(), Token::EOS);
 }
 
+BOOST_AUTO_TEST_CASE(special_comment_with_invalid_escapes)
+{
+	std::string input(R"("test\x\f\g\u\g\a\u\g\a12\uö\xyoof")");
+	std::string expectedOutput(R"(test\x\f\g\u\g\a\u\g\a12\uö\xyoof)");
+	CharStream stream(input, "");
+	Scanner scanner(stream, ScannerKind::SpecialComment);
+	BOOST_REQUIRE(scanner.currentToken() == Token::StringLiteral);
+	BOOST_REQUIRE(scanner.currentLiteral() == expectedOutput);
+}
+
+BOOST_AUTO_TEST_CASE(special_comment_with_valid_and_invalid_escapes)
+{
+	std::string input(R"("test\n\x61\t\u01A9test\f")");
+	std::string expectedOutput(R"(test
+a	Ʃtest\f)");
+	CharStream stream(input, "");
+	Scanner scanner(stream, ScannerKind::SpecialComment);
+	BOOST_REQUIRE(scanner.currentToken() == Token::StringLiteral);
+	BOOST_REQUIRE(scanner.currentLiteral() == expectedOutput);
+}
+
+BOOST_AUTO_TEST_CASE(special_comment_with_unterminated_string)
+{
+	CharStream stream(R"("test\)", "");
+	Scanner scanner(stream, ScannerKind::SpecialComment);
+	BOOST_REQUIRE(scanner.currentToken() == Token::Illegal);
+	BOOST_REQUIRE(scanner.currentError() == ScannerError::IllegalStringEndQuote);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 } // end namespaces

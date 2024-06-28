@@ -764,7 +764,7 @@ bool Scanner::scanEscape()
 	char c = m_char;
 
 	// Skip escaped newlines.
-	if (tryScanEndOfLine())
+	if (m_kind != ScannerKind::SpecialComment && tryScanEndOfLine())
 		return true;
 	advance();
 
@@ -786,17 +786,42 @@ bool Scanner::scanEscape()
 	case 'u':
 	{
 		if (auto const codepoint = scanUnicode(); codepoint.has_value())
+		{
 			addUnicodeAsUTF8(*codepoint);
-		else
+			return true;
+		}
+		else if (m_kind != ScannerKind::SpecialComment)
 			return false;
-		return true;
+		else
+		{
+			addLiteralChar('\\');
+			addLiteralChar(c);
+			return true;
+		}
 	}
 	case 'x':
-		if (!scanHexByte(c))
-			return false;
+		if (m_kind != ScannerKind::SpecialComment)
+		{
+			if (!scanHexByte(c))
+				return false;
+		}
+		else
+			if (!scanHexByte(c))
+			{
+				addLiteralChar('\\');
+				addLiteralChar(c);
+				return true;
+			}
 		break;
 	default:
-		return false;
+		if (m_kind != ScannerKind::SpecialComment)
+			return false;
+		else
+		{
+			addLiteralChar('\\');
+			addLiteralChar(c);
+			return true;
+		}
 	}
 
 	addLiteralChar(c);
