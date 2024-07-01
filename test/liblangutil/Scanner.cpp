@@ -1047,9 +1047,17 @@ a	Ʃtest\f)");
 	BOOST_REQUIRE(scanner.currentLiteral() == expectedOutput);
 }
 
-BOOST_AUTO_TEST_CASE(special_comment_with_unterminated_string)
+BOOST_AUTO_TEST_CASE(special_comment_with_unterminated_escape_sequence_at_eos)
 {
 	CharStream stream(R"("test\)", "");
+	Scanner scanner(stream, ScannerKind::SpecialComment);
+	BOOST_REQUIRE(scanner.currentToken() == Token::Illegal);
+	BOOST_REQUIRE(scanner.currentError() == ScannerError::IllegalEscapeSequence);
+}
+
+BOOST_AUTO_TEST_CASE(special_comment_with_unterminated_string)
+{
+	CharStream stream(R"("test)", "");
 	Scanner scanner(stream, ScannerKind::SpecialComment);
 	BOOST_REQUIRE(scanner.currentToken() == Token::Illegal);
 	BOOST_REQUIRE(scanner.currentError() == ScannerError::IllegalStringEndQuote);

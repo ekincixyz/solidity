@@ -814,8 +814,6 @@ BOOST_AUTO_TEST_CASE(customSourceLocations_invalid_escapes)
 	EVMDialectTyped const& dialect = EVMDialectTyped::instance(EVMVersion{});
 	std::shared_ptr<Block> result = parse(sourceText, dialect, reporter);
 	BOOST_REQUIRE(!!result && errorList.size() == 0);
-	// the second source location is not parsed as such, as the hex string isn't interpreted as snippet but
-	// as the beginning of the tail in AsmParser
 	CHECK_LOCATION(result->debugData->originLocation, "source0", 111, 222);
 }
 
@@ -831,8 +829,6 @@ BOOST_AUTO_TEST_CASE(customSourceLocations_single_quote_snippet_with_whitespaces
 	EVMDialectTyped const& dialect = EVMDialectTyped::instance(EVMVersion{});
 	std::shared_ptr<Block> result = parse(sourceText, dialect, reporter);
 	BOOST_REQUIRE(!!result && errorList.size() == 0);
-	// the second source location is not parsed as such, as the hex string isn't interpreted as snippet but
-	// as the beginning of the tail in AsmParser
 	CHECK_LOCATION(result->debugData->originLocation, "source1", 222, 333);
 }
 

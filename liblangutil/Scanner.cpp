@@ -759,12 +759,13 @@ void Scanner::scanToken()
 	m_tokens[NextNext].extendedTokenInfo = std::make_tuple(m, n);
 }
 
-bool Scanner::scanEscape()
+bool Scanner::scanEscape(bool const _rejectInvalidEscapes)
 {
 	char c = m_char;
 
-	// Skip escaped newlines.
-	if (m_kind != ScannerKind::SpecialComment && tryScanEndOfLine())
+	// Normally we ignore the slash just before a newline since it's meaningless.
+	// In the case of not rejecting invalid escapes, though, we preserve it.
+	if (_rejectInvalidEscapes && tryScanEndOfLine())
 		return true;
 	advance();
 
@@ -790,7 +791,7 @@ bool Scanner::scanEscape()
 			addUnicodeAsUTF8(*codepoint);
 			return true;
 		}
-		else if (m_kind != ScannerKind::SpecialComment)
+		else if (_rejectInvalidEscapes)
 			return false;
 		else
 		{
@@ -800,7 +801,7 @@ bool Scanner::scanEscape()
 		}
 	}
 	case 'x':
-		if (m_kind != ScannerKind::SpecialComment)
+		if (_rejectInvalidEscapes)
 		{
 			if (!scanHexByte(c))
 				return false;
@@ -814,7 +815,7 @@ bool Scanner::scanEscape()
 			}
 		break;
 	default:
-		if (m_kind != ScannerKind::SpecialComment)
+		if (_rejectInvalidEscapes)
 			return false;
 		else
 		{
@@ -860,7 +861,13 @@ Token Scanner::scanString(bool const _isUnicode)
 		if (m_kind == ScannerKind::SpecialComment)
 		{
 			if (c == '\\')
-				scanEscape();
+			{
+				if (isSourcePastEndOfInput())
+					return setError(ScannerError::IllegalEscapeSequence);
+				bool const validEscape = scanEscape(false /* _rejectInvalidEscapes */);
+				// there are no invalid escapes in special comments except unterminated backslash at eos
+				solAssert(validEscape);
+			}
 			else
 				addLiteralChar(c);
 		}

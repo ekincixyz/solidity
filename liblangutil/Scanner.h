@@ -246,7 +246,7 @@ private:
 	/// Scans an escape-sequence which is part of a string and adds the
 	/// decoded character to the current literal. Returns true if a pattern
 	/// is scanned.
-	bool scanEscape();
+	bool scanEscape(bool _rejectInvalidEscapes = true);
 
 	/// @returns true iff we are currently positioned at a unicode line break.
 	bool isUnicodeLinebreak();

@@ -3,7 +3,7 @@
 Language Features:
  * Accept declarations of state variables with ``transient`` data location (parser support only, no code generation yet).
  * Make ``require(bool, Error)`` available when using the legacy pipeline.
- * Yul: Parsing rules for source location comments have been relaxed: Whitespace between the indices as well as single-quoted code snippets are now allowed.
+ * Yul: Parsing rules for source location comments have been relaxed: Whitespace between the location components as well as single-quoted code snippets are now allowed.
 
 
 Compiler Features:
@@ -14,12 +14,12 @@ Compiler Features:
 
 
 Bugfixes:
- * AsmParser: Alleviates risk of encountering a segfault for very long comments.
  * SMTChecker: Fix error that reports invalid number of verified checks for BMC and CHC engines.
  * SMTChecker: Fix formatting of unary minus expressions in invariants.
  * SMTChecker: Fix internal compiler error when reporting proved targets for BMC engine.
  * TypeChecker: Fix segfault when assigning nested tuple to tuple.
  * Yul Optimizer: Name simplification could lead to forbidden identifiers with a leading and/or trailing dot, e.g., ``x._`` would get simplified into ``x.``.
+ * Yul Parser: Fix segfault when parsing very long location comments.
 
 
 ### 0.8.26 (2024-05-21)
