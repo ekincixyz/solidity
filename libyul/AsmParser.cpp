@@ -235,14 +235,16 @@ std::optional<std::pair<std::string_view, SourceLocation>> Parser::parseSrcComme
 		return std::nullopt;
 	}
 
-	if (scanner.currentToken() == Token::StringLiteral || (scanner.currentToken() == Token::Illegal && scanner.currentError() == ScannerError::IllegalStringEndQuote))
+	// captures error cases `"test` (illegal end quote) and `"test\` (illegal escape sequence / dangling backslash)
+	bool const illegalLiteral = scanner.currentToken() == Token::Illegal && (scanner.currentError() == ScannerError::IllegalStringEndQuote || scanner.currentError() == ScannerError::IllegalEscapeSequence);
+	if (scanner.currentToken() == Token::StringLiteral || illegalLiteral)
 		tail = _arguments.substr(static_cast<size_t>(scanner.currentLocation().end));
 	else
 		tail = _arguments.substr(static_cast<size_t>(scanner.currentLocation().start));
 
 	// Other scanner errors may occur if there is no string literal which follows
 	// (f.ex. IllegalHexDigit, IllegalCommentTerminator), but these are ignored
-	if (scanner.currentToken() == Token::Illegal && scanner.currentError() == ScannerError::IllegalStringEndQuote)
+	if (illegalLiteral)
 	{
 		m_errorReporter.syntaxError(
 			1544_error,
